@@ -1,0 +1,23 @@
+repositories:
+  - name: timescale
+    url: https://charts.timescale.com
+
+releases:
+  - name: timescaledb
+    namespace: timescaledb-simple
+    createNamespace: true
+    chart: timescale/timescaledb-single
+    values:
+      - secrets:
+          credentials:
+            PATRONI_SUPERUSER_PASSWORD: postgres
+            PATRONI_REPLICATION_PASSWORD: postgres
+            PATRONI_admin_PASSWORD: postgres
+        persistentVolumes:
+          data:
+            size: 10Gi
+        replicaCount: 1
+        service:
+          primary:
+            nodePort: 30001
+            type: NodePort
