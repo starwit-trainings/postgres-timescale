@@ -1,0 +1,14 @@
+{
+    "Servers": {
+        "databackend": {
+            "Name": "Timescale",
+            "Group": "Servers",
+            "Port": 5432,
+            "Username": "postgres",
+            "Host": "timescaledb",
+            "SSLMode": "prefer",
+            "MaintenanceDB": "postgres",
+            "PasswordExecCommand": "echo 'postgres'"
+        }
+    }
+}
