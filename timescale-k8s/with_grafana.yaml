@@ -1,0 +1,70 @@
+repositories:
+  - name: timescale
+    url: https://charts.timescale.com
+  - name: runix
+    url: https://helm.runix.net
+  - name: bitnami
+    url: registry-1.docker.io/bitnamicharts
+    oci: true
+
+releases:
+  - name: timescaledb
+    namespace: timescaledb-with-grafana
+    createNamespace: true
+    chart: timescale/timescaledb-single
+    values:
+      - secrets:
+          credentials:
+            PATRONI_SUPERUSER_PASSWORD: postgres
+            PATRONI_REPLICATION_PASSWORD: postgres
+            PATRONI_admin_PASSWORD: postgres
+        persistentVolumes:
+          data:
+            size: 10Gi
+        replicaCount: 1
+        service:
+          primary:
+            nodePort: 30001
+            type: NodePort
+  
+  - name: pgadmin
+    namespace: timescaledb-with-grafana
+    createNamespace: true
+    chart: runix/pgadmin4
+    values:
+      - env:
+          contextPath: /pgadmin
+          email: admin@admin.admin
+          password: admin
+        ingress:
+          enabled: true
+          hosts:
+            - host: localhost
+              paths:
+                - path: /pgadmin
+                  pathType: Prefix
+        serverDefinitions:
+          enabled: true
+          resourceType: Secret
+          servers:
+            timescale:
+              Name: Timescale
+              Group: Servers
+              Port: 5432
+              Username: postgres
+              Host: timescaledb.timescaledb-with-pgadmin.svc.cluster.local
+              SSLMode: prefer
+              MaintenanceDB: postgres
+
+  - name: grafana
+    namespace: timescaledb-with-grafana
+    createNamespace: true
+    chart: bitnami/grafana
+    version: 9.6.7
+    values:
+      - admin:
+          password: admin
+        ingress:
+          enabled: true
+          hostname: grafana.florian-kubuntu
+          path: /
